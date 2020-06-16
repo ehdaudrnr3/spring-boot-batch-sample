@@ -1,6 +1,10 @@
 package com.spring.boot.batch.event;
 
+import java.io.IOException;
+
 import org.springframework.batch.core.ItemReadListener;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 
 import com.spring.boot.batch.domain.Customer;
 
@@ -15,8 +19,18 @@ public class ItemReaderEventListener implements ItemReadListener<Customer>{
 	}
 
 	@Override
-	public void afterRead(Customer item) {
-		log.info("Called ItemReaderEventListener afer : "+item.toString());
+	public void afterRead(Customer customer) {
+		String path = ".\\output\\classifilerMultifile\\"+customer.getFileName();
+		Resource resource = new FileSystemResource(path);
+		try {
+			if(resource.getFile().exists()) {
+				resource.getFile().delete();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		log.info("Called ItemReaderEventListener afer : "+customer.toString());
 	}
 
 	@Override

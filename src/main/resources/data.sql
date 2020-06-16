@@ -17,4 +17,5 @@ INSERT INTO customer (id, firstName, lastName, birthdate, insertDate) VALUES ('1
 INSERT INTO customer (id, firstName, lastName, birthdate, insertDate) VALUES ('17', 'Andrew', 'Thomas', '20200801', CURRENT_TIMESTAMP);
 INSERT INTO customer (id, firstName, lastName, birthdate, insertDate) VALUES ('18', 'Jose', 'Hannah', '20200901', CURRENT_TIMESTAMP);
 INSERT INTO customer (id, firstName, lastName, birthdate, insertDate) VALUES ('19', 'Valerie', 'Hilbert', '20201001', CURRENT_TIMESTAMP);
-INSERT INTO customer (id, firstName, lastName, birthdate, insertDate) VALUES ('20', 'Patrick', 'Durham', '20201201', CURRENT_TIMESTAMP);
+INSERT INTO customer (id, firstName, lastName, birthdate, insertDate) VALUES ('20', 'Kim', 'jihoon', '20201101', CURRENT_TIMESTAMP);
+INSERT INTO customer (id, firstName, lastName, birthdate, insertDate) VALUES ('21', 'Patrick', 'Durham', '20201201', CURRENT_TIMESTAMP);

@@ -24,4 +24,8 @@ public class CustomerExtendModel {
 		this.yearMonth = customer.getBirthDate().substring(0, 6);
 		this.time = new SimpleDateFormat("HH:mm:ss").format(customer.getInsertDate());
 	}
+	
+	public String getFileName() {
+    	return "Customer_" +yearMonth+".csv";
+    }
 }

@@ -27,6 +27,7 @@ import org.springframework.core.io.Resource;
 
 import com.spring.boot.batch.domain.Customer;
 import com.spring.boot.batch.domain.CustomerExtendModel;
+import com.spring.boot.batch.event.ItemReaderEventListener;
 import com.spring.boot.batch.flatfile.header.MybatisFlatFileHeaderCallback;
 import com.spring.boot.batch.writer.MultiFlatFileCustomWriter;
 
@@ -42,13 +43,15 @@ public class ClassifierMultiFileJobConfiguration {
 	private final StepBuilderFactory stepBuilderFactory;
 	private final SqlSessionFactory sessionFactory;
 	
+	private final int chunkSize = 20;
+	
 	@Bean
 	@StepScope
 	public MyBatisPagingItemReader<Customer> classifierMultiFilePagingItemReader() {
 		
 		MyBatisPagingItemReader<Customer> itemReader = new MyBatisPagingItemReader<Customer>();
 		itemReader.setSqlSessionFactory(sessionFactory);
-		itemReader.setPageSize(200);
+		itemReader.setPageSize(chunkSize);
 		itemReader.setQueryId("com.spring.boot.batch.Customer.list");
 		return itemReader;
 	}
@@ -60,6 +63,7 @@ public class ClassifierMultiFileJobConfiguration {
 		};
 	}
 	
+	
 	public MultiFlatFileCustomWriter<CustomerExtendModel> classifierMultiFileItemWriter(String resourcePath) throws ItemStreamException, IOException {
 		log.info(">> ClassifierMultiFileJobConfiguration : multifile Output Path = " + resourcePath);
 		
@@ -67,8 +71,6 @@ public class ClassifierMultiFileJobConfiguration {
 		MultiFlatFileCustomWriter<CustomerExtendModel> itemWriter = new MultiFlatFileCustomWriter<CustomerExtendModel>();
 		itemWriter.setAppendAllowed(true);
 		itemWriter.setHeaderCallback(new MybatisFlatFileHeaderCallback());
-		itemWriter.setShouldDeleteIfExists(true);
-		itemWriter.setShouldDeleteIfEmpty(true);
 		itemWriter.setLineAggregator(new DelimitedLineAggregator<CustomerExtendModel>() {
 			{
 				setDelimiter("|");
@@ -85,10 +87,11 @@ public class ClassifierMultiFileJobConfiguration {
 		return itemWriter;
 	}
 	
+	
 	@Bean
 	public Classifier<CustomerExtendModel, ItemWriter<? super CustomerExtendModel>> classifierMultifileItemClassfier() {
 		return model -> {
-			String path = ".\\output\\classifilerMultifile\\Customer"+model.getYearMonth()+".csv";
+			String path = ".\\output\\classifilerMultifile\\"+model.getFileName();
 			try {
 				return classifierMultiFileItemWriter(path);
 			} catch (ItemStreamException e) {
@@ -110,10 +113,11 @@ public class ClassifierMultiFileJobConfiguration {
 	@JobScope
 	public Step classifierMultiFileStep() throws IOException, Exception {
 		return stepBuilderFactory.get("classifierMultiFileStep")
-				.<Customer, CustomerExtendModel>chunk(20)
+				.<Customer, CustomerExtendModel>chunk(chunkSize)
 				.reader(classifierMultiFilePagingItemReader())
 				.processor(classifierMultiFileProcessor())
 				.writer(classifierMultifileCompositeItemWriter())
+				.listener(new ItemReaderEventListener())
 				.build();
 	}
 	

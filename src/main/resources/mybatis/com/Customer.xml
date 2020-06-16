@@ -5,6 +5,6 @@
 		SELECT * 
 		FROM CUSTOMER 
 		
-		LIMIT #{_page}, #{_pagesize}
+		LIMIT #{_skiprows}, #{_pagesize}
 	</select>
 </mapper>

@@ -20,4 +20,8 @@ public class Customer {
     private String lastName;
     private String birthDate;
     private Date insertDate;
+    
+    public String getFileName() {
+    	return "Customer_" + getBirthDate().substring(0, 6)+".csv";
+    }
 }

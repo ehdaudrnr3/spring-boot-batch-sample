@@ -99,6 +99,10 @@ public abstract class AbstractCustomerFileItemWriter<T> extends AbstractItemStre
 	public void setResource(Resource resource) {
 		this.resource = resource;
 	}
+	
+	public Resource getResource() {
+		return this.resource;
+	}
 
 	/**
 	 * Sets encoding for output template.

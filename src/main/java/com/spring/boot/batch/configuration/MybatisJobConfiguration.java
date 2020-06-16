@@ -8,7 +8,6 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
@@ -33,13 +32,15 @@ public class MybatisJobConfiguration {
 	private final StepBuilderFactory stepBuilderFactory;
 	private final SqlSessionFactory sessionFactory;
 	
+	private final int chunkSize = 10;
+	
 	@Bean
 	@StepScope
 	public MyBatisPagingItemReader<Customer> myBatisPagingItemReader() {
 		
 		MyBatisPagingItemReader<Customer> itemReader = new MyBatisPagingItemReader<Customer>();
 		itemReader.setSqlSessionFactory(sessionFactory);
-		itemReader.setPageSize(200);
+		itemReader.setPageSize(chunkSize);
 		itemReader.setQueryId("com.spring.boot.batch.Customer.list");
 		return itemReader;
 	}
@@ -51,7 +52,6 @@ public class MybatisJobConfiguration {
 		};
 	}
 	
-	@Bean
 	public FlatFileItemWriter<CustomerExtendModel> mybatisItemWriter() {
 		String path = ".\\output\\csv\\customer.csv";
 		log.info(">> MybatisJobConfiguration : csv Output Path = " + path);
@@ -76,7 +76,7 @@ public class MybatisJobConfiguration {
 	@JobScope
 	public Step mybatisStep() {
 		return stepBuilderFactory.get("mybatisStep")
-				.<Customer, CustomerExtendModel>chunk(20)
+				.<Customer, CustomerExtendModel>chunk(chunkSize)
 				.reader(myBatisPagingItemReader())
 				.processor(mybatisProcessor())
 				.writer(mybatisItemWriter())
@@ -86,7 +86,6 @@ public class MybatisJobConfiguration {
 	@Bean
 	public Job mybatisJob() {
 		return jobBuilderFactory.get("mybatisJob")
-				.incrementer(new RunIdIncrementer())
 				.start(mybatisStep())
 				.build();
 	}

@@ -9,17 +9,12 @@ import org.springframework.util.ClassUtils;
 
 public class MultiFlatFileCustomWriter<T> extends AbstractCustomerFileItemWriter<T> {
 	
-	protected LineAggregator<T> lineAggregator;
-
+	private LineAggregator<T> lineAggregator;
+	
 	public MultiFlatFileCustomWriter() {
 		this.setExecutionContextName(ClassUtils.getShortName(FlatFileItemWriter.class));
 	}
 
-	/**
-	 * Assert that mandatory properties (lineAggregator) are set.
-	 * 
-	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet()
-	 */
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		Assert.notNull(lineAggregator, "A LineAggregator must be provided.");
@@ -28,12 +23,6 @@ public class MultiFlatFileCustomWriter<T> extends AbstractCustomerFileItemWriter
 		}
 	}
 
-	/**
-	 * Public setter for the {@link LineAggregator}. This will be used to
-	 * translate the item into a line for output.
-	 * 
-	 * @param lineAggregator the {@link LineAggregator} to set
-	 */
 	public void setLineAggregator(LineAggregator<T> lineAggregator) {
 		this.lineAggregator = lineAggregator;
 	}
