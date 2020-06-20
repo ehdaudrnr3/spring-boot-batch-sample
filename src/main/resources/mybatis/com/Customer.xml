@@ -7,4 +7,14 @@
 		
 		LIMIT #{_skiprows}, #{_pagesize}
 	</select>
+	
+	<select id="list2" resultType="com.spring.boot.batch.domain.Customer">
+		SELECT * 
+		FROM CUSTOMER 
+		WHERE 1 = 1
+		<if test ="birthDateStart != null and birthDateEnd != null">
+			AND birthDate BETWEEN #{birthDateStart} AND #{birthDateEnd}
+		</if> 
+		
+	</select>
 </mapper>

@@ -12,14 +12,10 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.item.ExecutionContext;
-import org.springframework.batch.item.ItemStreamException;
 import org.springframework.batch.item.database.JdbcPagingItemReader;
 import org.springframework.batch.item.database.Order;
 import org.springframework.batch.item.database.support.H2PagingQueryProvider;
 import org.springframework.batch.item.file.FlatFileItemWriter;
-import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
-import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
 import org.springframework.batch.item.support.ClassifierCompositeItemWriter;
 import org.springframework.batch.item.support.builder.ClassifierCompositeItemWriterBuilder;
 import org.springframework.batch.item.xml.StaxEventItemWriter;
@@ -27,7 +23,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
 import org.springframework.oxm.xstream.XStreamMarshaller;
 
 import com.spring.boot.batch.aggregator.CustomLineAggregator;
@@ -37,7 +32,6 @@ import com.spring.boot.batch.event.ItemReaderEventListener;
 import com.spring.boot.batch.event.ItemWriterEventListener;
 import com.spring.boot.batch.event.JobExecutionEventListener;
 import com.spring.boot.batch.rowmapper.CustomerMapper;
-import com.spring.boot.batch.writer.DynamicFlatItemWriter;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -96,28 +90,6 @@ public class JobClassifierConfiguration {
 		itemWriter.setRootTagName("customers");
 		itemWriter.setMarshaller(marshaller);
 		itemWriter.setResource(new FileSystemResource(path));
-		
-		return itemWriter;
-	}
-	
-	@Bean
-	public DynamicFlatItemWriter<Customer> jdbcFlatItemWriter() throws ItemStreamException, IOException {
-		String resourcePath = ".\\output\\classifier\\customer.csv";
-		
-		Resource resource = new FileSystemResource(resourcePath);
-		DynamicFlatItemWriter<Customer> itemWriter = new DynamicFlatItemWriter<>();
-		itemWriter.setLineAggregator(new DelimitedLineAggregator<Customer>() {
-			{
-				setDelimiter("|");
-				setFieldExtractor(new BeanWrapperFieldExtractor<Customer>() {
-					{
-						setNames(new String[] { "id", "firstName", "lastName"});
-					}
-				});
-			}
-		});
-		itemWriter.setResource(resource);
-		itemWriter.open(new ExecutionContext());
 		
 		return itemWriter;
 	}
