@@ -13,7 +13,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.batch.item.ExecutionContext;
-import org.springframework.batch.item.ItemStream;
 import org.springframework.batch.item.ItemStreamException;
 import org.springframework.batch.item.WriteFailedException;
 import org.springframework.batch.item.WriterNotOpenException;
@@ -36,7 +35,6 @@ public abstract class AbstractCustomerFileItemWriter<T> extends AbstractItemStre
 
 	public static final String DEFAULT_LINE_SEPARATOR = System.getProperty("line.separator");
 
-	// default encoding for writing to output files - set to UTF-8.
 	public static final String DEFAULT_CHARSET = "UTF-8";
 
 	private static final String WRITTEN_STATISTICS_NAME = "written";
@@ -67,34 +65,14 @@ public abstract class AbstractCustomerFileItemWriter<T> extends AbstractItemStre
 
 	protected boolean append = false;
 
-	/**
-	 * Flag to indicate that changes should be force-synced to disk on flush.
-	 * Defaults to false, which means that even with a local disk changes could be
-	 * lost if the OS crashes in between a write and a cache flush. Setting to true
-	 * may result in slower performance for usage patterns involving many frequent
-	 * writes.
-	 * 
-	 * @param forceSync the flag value to set
-	 */
 	public void setForceSync(boolean forceSync) {
 		this.forceSync = forceSync;
 	}
 
-	/**
-	 * Public setter for the line separator. Defaults to the System property
-	 * line.separator.
-	 * 
-	 * @param lineSeparator the line separator to set
-	 */
 	public void setLineSeparator(String lineSeparator) {
 		this.lineSeparator = lineSeparator;
 	}
 
-	/**
-	 * Setter for resource. Represents a file that can be written.
-	 * 
-	 * @param resource the resource to be written to
-	 */
 	@Override
 	public void setResource(Resource resource) {
 		this.resource = resource;
@@ -104,104 +82,38 @@ public abstract class AbstractCustomerFileItemWriter<T> extends AbstractItemStre
 		return this.resource;
 	}
 
-	/**
-	 * Sets encoding for output template.
-	 *
-	 * @param newEncoding {@link String} containing the encoding to be used for the
-	 *                    writer.
-	 */
 	public void setEncoding(String newEncoding) {
 		this.encoding = newEncoding;
 	}
 
-	/**
-	 * Flag to indicate that the target file should be deleted if it already exists,
-	 * otherwise it will be created. Defaults to true, so no appending except on
-	 * restart. If set to false and {@link #setAppendAllowed(boolean) appendAllowed}
-	 * is also false then there will be an exception when the stream is opened to
-	 * prevent existing data being potentially corrupted.
-	 * 
-	 * @param shouldDeleteIfExists the flag value to set
-	 */
 	public void setShouldDeleteIfExists(boolean shouldDeleteIfExists) {
 		this.shouldDeleteIfExists = shouldDeleteIfExists;
 	}
 
-	/**
-	 * Flag to indicate that the target file should be appended if it already
-	 * exists. If this flag is set then the flag
-	 * {@link #setShouldDeleteIfExists(boolean) shouldDeleteIfExists} is
-	 * automatically set to false, so that flag should not be set explicitly.
-	 * Defaults value is false.
-	 * 
-	 * @param append the flag value to set
-	 */
 	public void setAppendAllowed(boolean append) {
 		this.append = append;
 	}
 
-	/**
-	 * Flag to indicate that the target file should be deleted if no lines have been
-	 * written (other than header and footer) on close. Defaults to false.
-	 * 
-	 * @param shouldDeleteIfEmpty the flag value to set
-	 */
 	public void setShouldDeleteIfEmpty(boolean shouldDeleteIfEmpty) {
 		this.shouldDeleteIfEmpty = shouldDeleteIfEmpty;
 	}
 
-	/**
-	 * Set the flag indicating whether or not state should be saved in the provided
-	 * {@link ExecutionContext} during the {@link ItemStream} call to update.
-	 * Setting this to false means that it will always start at the beginning on a
-	 * restart.
-	 * 
-	 * @param saveState if true, state will be persisted
-	 */
 	public void setSaveState(boolean saveState) {
 		this.saveState = saveState;
 	}
 
-	/**
-	 * headerCallback will be called before writing the first item to file. Newline
-	 * will be automatically appended after the header is written.
-	 *
-	 * @param headerCallback {@link FlatFileHeaderCallback} to generate the header
-	 *
-	 */
 	public void setHeaderCallback(FlatFileHeaderCallback headerCallback) {
 		this.headerCallback = headerCallback;
 	}
 
-	/**
-	 * footerCallback will be called after writing the last item to file, but before
-	 * the file is closed.
-	 *
-	 * @param footerCallback {@link FlatFileFooterCallback} to generate the footer
-	 *
-	 */
 	public void setFooterCallback(FlatFileFooterCallback footerCallback) {
 		this.footerCallback = footerCallback;
 	}
 
-	/**
-	 * Flag to indicate that writing to the buffer should be delayed if a
-	 * transaction is active. Defaults to true.
-	 *
-	 * @param transactional true if writing to buffer should be delayed.
-	 *
-	 */
 	public void setTransactional(boolean transactional) {
 		this.transactional = transactional;
 	}
 
-	/**
-	 * Writes out a string followed by a "new line", where the format of the new
-	 * line separator is determined by the underlying operating system.
-	 * 
-	 * @param items list of items to be written to output stream
-	 * @throws Exception if an error occurs while writing items to the output stream
-	 */
 	@Override
 	public void write(List<? extends T> items) throws Exception {
 		if (!getOutputState().isInitialized()) {
@@ -223,18 +135,8 @@ public abstract class AbstractCustomerFileItemWriter<T> extends AbstractItemStre
 		state.setLinesWritten(state.getLinesWritten() + items.size());
 	}
 
-	/**
-	 * Write out a string of items followed by a "new line", where the format of the
-	 * new line separator is determined by the underlying operating system.
-	 * 
-	 * @param items to be written
-	 * @return written lines
-	 */
 	protected abstract String doWrite(List<? extends T> items);
 
-	/**
-	 * @see ItemStream#close()
-	 */
 	@Override
 	public void close() {
 		super.close();
@@ -260,12 +162,6 @@ public abstract class AbstractCustomerFileItemWriter<T> extends AbstractItemStre
 		}
 	}
 
-	/**
-	 * Initialize the reader. This method may be called multiple times before close
-	 * is called.
-	 * 
-	 * @see ItemStream#open(ExecutionContext)
-	 */
 	@Override
 	public void open(ExecutionContext executionContext) throws ItemStreamException {
 		super.open(executionContext);
@@ -308,9 +204,6 @@ public abstract class AbstractCustomerFileItemWriter<T> extends AbstractItemStre
 		}
 	}
 
-	/**
-	 * @see ItemStream#update(ExecutionContext)
-	 */
 	@Override
 	public void update(ExecutionContext executionContext) {
 		super.update(executionContext);
@@ -332,7 +225,6 @@ public abstract class AbstractCustomerFileItemWriter<T> extends AbstractItemStre
 		}
 	}
 
-// Returns object representing state.
 	protected OutputState getOutputState() {
 		if (state == null) {
 			File file;
@@ -350,21 +242,14 @@ public abstract class AbstractCustomerFileItemWriter<T> extends AbstractItemStre
 		return state;
 	}
 
-	/**
-	 * Encapsulates the runtime state of the writer. All state changing operations
-	 * on the writer go through this class.
-	 */
 	protected class OutputState {
 
 		private FileOutputStream os;
 
-// The bufferedWriter over the file channel that is actually written
 		Writer outputBufferedWriter;
 
 		FileChannel fileChannel;
 
-// this represents the charset encoding (if any is needed) for the
-// output file
 		String encoding = DEFAULT_CHARSET;
 
 		boolean restarted = false;
@@ -381,13 +266,6 @@ public abstract class AbstractCustomerFileItemWriter<T> extends AbstractItemStre
 
 		private boolean appending = false;
 
-		/**
-		 * Return the byte offset position of the cursor in the output file as a long
-		 * integer.
-		 * 
-		 * @return the byte offset position of the cursor in the output file
-		 * @throws IOException If unable to get the offset position
-		 */
 		public long position() throws IOException {
 			long pos = 0;
 
@@ -405,16 +283,10 @@ public abstract class AbstractCustomerFileItemWriter<T> extends AbstractItemStre
 
 		}
 
-		/**
-		 * @param append if true, append to previously created file
-		 */
 		public void setAppendAllowed(boolean append) {
 			this.append = append;
 		}
 
-		/**
-		 * @param executionContext state from which to restore writing from
-		 */
 		public void restoreFrom(ExecutionContext executionContext) {
 			lastMarkedByteOffsetPosition = executionContext.getLong(getExecutionContextKey(RESTART_DATA_NAME));
 			linesWritten = executionContext.getLong(getExecutionContextKey(WRITTEN_STATISTICS_NAME));
@@ -434,9 +306,6 @@ public abstract class AbstractCustomerFileItemWriter<T> extends AbstractItemStre
 			this.shouldDeleteIfExists = shouldDeleteIfExists;
 		}
 
-		/**
-		 * @param encoding file encoding
-		 */
 		public void setEncoding(String encoding) {
 			this.encoding = encoding;
 		}
@@ -449,9 +318,6 @@ public abstract class AbstractCustomerFileItemWriter<T> extends AbstractItemStre
 			this.linesWritten = linesWritten;
 		}
 
-		/**
-		 * Close the open resource and reset counters.
-		 */
 		public void close() {
 
 			initialized = false;
@@ -487,10 +353,6 @@ public abstract class AbstractCustomerFileItemWriter<T> extends AbstractItemStre
 			}
 		}
 
-		/**
-		 * @param line String to be written to the file
-		 * @throws IOException If unable to write the String to the file
-		 */
 		public void write(String line) throws IOException {
 			if (!initialized) {
 				initializeBufferedWriter();
@@ -500,22 +362,11 @@ public abstract class AbstractCustomerFileItemWriter<T> extends AbstractItemStre
 			outputBufferedWriter.flush();
 		}
 
-		/**
-		 * Truncate the output at the last known good point.
-		 * 
-		 * @throws IOException if unable to work with file
-		 */
 		public void truncate() throws IOException {
 			fileChannel.truncate(lastMarkedByteOffsetPosition);
 			fileChannel.position(lastMarkedByteOffsetPosition);
 		}
 
-		/**
-		 * Creates the buffered writer for the output file channel based on
-		 * configuration information.
-		 * 
-		 * @throws IOException if unable to initialize buffer
-		 */
 		private void initializeBufferedWriter() throws IOException {
 
 			File file = resource.getFile();
@@ -550,10 +401,6 @@ public abstract class AbstractCustomerFileItemWriter<T> extends AbstractItemStre
 			return initialized;
 		}
 
-		/**
-		 * Returns the buffered writer opened to the beginning of the file specified by
-		 * the absolute path name contained in absoluteFileName.
-		 */
 		private Writer getBufferedWriter(FileChannel fileChannel, String encoding) {
 			try {
 				final FileChannel channel = fileChannel;
@@ -582,14 +429,6 @@ public abstract class AbstractCustomerFileItemWriter<T> extends AbstractItemStre
 			}
 		}
 
-		/**
-		 * Checks (on setState) to make sure that the current output file's size is not
-		 * smaller than the last saved commit point. If it is, then the file has been
-		 * damaged in some way and whole task must be started over again from the
-		 * beginning.
-		 * 
-		 * @throws IOException if there is an IO problem
-		 */
 		private void checkFileSize() throws IOException {
 			long size = -1;
 
