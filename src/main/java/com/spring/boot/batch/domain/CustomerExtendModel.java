@@ -25,7 +25,7 @@ public class CustomerExtendModel {
 		this.time = new SimpleDateFormat("HH:mm:ss").format(customer.getInsertDate());
 	}
 	
-	public String getFileName() {
-    	return "Customer_" +yearMonth+".csv";
+	public String getFileName(String writeDate) {
+    	return "Customer_" +yearMonth+"_"+writeDate+".csv";
     }
 }

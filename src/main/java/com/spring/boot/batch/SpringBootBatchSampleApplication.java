@@ -36,6 +36,9 @@ public class SpringBootBatchSampleApplication implements CommandLineRunner {
 	@Resource(name = "taskletJob")
 	private final Job taskletJob;
 	
+	@Resource(name = "multiFileJob")
+	private final Job multiFileJob;
+	
 	public static void main(String[] args) {
 		SpringApplication.run(SpringBootBatchSampleApplication.class, args);
 	}

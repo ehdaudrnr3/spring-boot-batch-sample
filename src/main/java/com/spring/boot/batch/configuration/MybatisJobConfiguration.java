@@ -8,6 +8,7 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.JobScope;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
@@ -69,6 +70,7 @@ public class MybatisJobConfiguration {
 			}
 		});
 		itemWriter.setResource(new FileSystemResource(path));
+		itemWriter.open(new ExecutionContext());
 		return itemWriter;
 	}
 	

@@ -2,11 +2,6 @@ package com.spring.boot.batch.domain;
 
 import java.util.Date;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,11 +13,8 @@ import lombok.ToString;
 @Builder
 @ToString
 @NoArgsConstructor
-@Entity
 public class Customer {
 	
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String firstName;
     private String lastName;

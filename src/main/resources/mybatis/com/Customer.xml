@@ -17,4 +17,17 @@
 		</if> 
 		
 	</select>
+	<insert id="insert" parameterType = "hashmap">
+		INSERT INTO CUSTOMER_FILE_INFO (
+			id
+			,fileName
+			,insertDate
+		)
+		VALUES (
+			(SELECT coalesce(MAX(id),0)+1 FROM CUSTOMER_FILE_INFO)
+			,#{fileName}
+			,CURRENT_TIMESTAMP
+		)
+		
+	</insert>
 </mapper>

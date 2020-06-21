@@ -12,12 +12,12 @@ import com.spring.boot.batch.util.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class StepExecutionEventListener implements StepExecutionListener {
+public class StepExecutionMultifileListener implements StepExecutionListener {
 
 	@Override
 	public void beforeStep(StepExecution stepExecution) {
-		Path from = Paths.get("./output/classifilerMultifile");
-		Path to = Paths.get("./output/classifilerMultifile/backup");
+		Path from = Paths.get("./output/multifile");
+		Path to = Paths.get("./output/multifile/backup");
 		
 		if(!to.toFile().isDirectory()) {
 			to.toFile().mkdir();
