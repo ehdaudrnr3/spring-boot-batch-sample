@@ -18,11 +18,8 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemStreamException;
-import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
 import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
-import org.springframework.batch.item.support.ClassifierCompositeItemWriter;
-import org.springframework.batch.item.support.builder.ClassifierCompositeItemWriterBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.classify.Classifier;
@@ -31,6 +28,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
+import com.spring.boot.batch.domain.CompositeModel;
 import com.spring.boot.batch.domain.Customer;
 import com.spring.boot.batch.domain.CustomerExtendModel;
 import com.spring.boot.batch.event.ItemReaderEventListener;
@@ -39,6 +37,7 @@ import com.spring.boot.batch.event.StepExecutionEventListener;
 import com.spring.boot.batch.flatfile.header.MybatisFlatFileHeaderCallback;
 import com.spring.boot.batch.jobparameters.CustomJobParameters;
 import com.spring.boot.batch.tasklet.CustomMulifileUploadTasklet;
+import com.spring.boot.batch.writer.CustomCompositeItemWriter;
 import com.spring.boot.batch.writer.MultiFlatFileCustomWriter;
 
 import lombok.RequiredArgsConstructor;
@@ -82,11 +81,11 @@ public class CustomMultiFileJobConfiguration {
 	}
 	
 	@Bean
-	public Classifier<CustomerExtendModel, ItemWriter<? super CustomerExtendModel>> classifierMultifileItemClassfier() {
+	public Classifier<CustomerExtendModel, CompositeModel> classifierMultifileItemClassfier() {
 		return model -> {
 			String path = ".\\output\\classifilerMultifile\\"+model.getFileName(executionTime);
 			try {
-				return classifierMultiFileItemWriter(path);
+				return new CompositeModel(model.getYearMonth(), classifierMultiFileItemWriter(path));
 			} catch (ItemStreamException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
@@ -97,10 +96,11 @@ public class CustomMultiFileJobConfiguration {
 	}
 	
 	@Bean
-	public ClassifierCompositeItemWriter<CustomerExtendModel> classifierMultifileCompositeItemWriter() throws IOException, Exception {
-		return new ClassifierCompositeItemWriterBuilder<CustomerExtendModel>()
-				.classifier(classifierMultifileItemClassfier())
-				.build();
+	public CustomCompositeItemWriter classifierMultifileCompositeItemWriter() throws IOException, Exception {
+		CustomCompositeItemWriter c = new CustomCompositeItemWriter();
+		c.setClassifier(classifierMultifileItemClassfier());
+		
+		return c;
 	}
 	
 	@StepScope
