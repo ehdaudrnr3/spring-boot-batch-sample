@@ -20,14 +20,20 @@
 	<insert id="insert" parameterType = "hashmap">
 		INSERT INTO CUSTOMER_FILE_INFO (
 			id
+			,jobId
 			,fileName
 			,insertDate
 		)
 		VALUES (
 			(SELECT coalesce(MAX(id),0)+1 FROM CUSTOMER_FILE_INFO)
+			,#{jobId}
 			,#{fileName}
 			,CURRENT_TIMESTAMP
 		)
 		
 	</insert>
+	<delete id="delete" parameterType = "hashmap">
+		DELETE FROM CUSTOMER_FILE_INFO
+		WHERE jobId = #{jobId}
+	</delete>
 </mapper>

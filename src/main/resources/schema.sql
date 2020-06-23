@@ -11,6 +11,7 @@ CREATE TABLE customer (
 
 CREATE TABLE customer_file_info (
     id bigint NOT NULL AUTO_INCREMENT primary key,
+    jobId VARCHAR(255) NULL,
     fileName VARCHAR(255) NULL,
     insertDate TIMESTAMP NULL
 );

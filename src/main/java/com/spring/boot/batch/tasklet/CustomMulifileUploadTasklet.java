@@ -26,13 +26,15 @@ public class CustomMulifileUploadTasklet implements Tasklet {
 	public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 		Path path = Paths.get("./output/classifilerMultifile");
 		Map<String, Object> params = new HashMap<>();
+		String jobId = chunkContext.getStepContext().getJobParameters().get("JobId").toString();
 		for(File file : path.toFile().listFiles()) {
 			if(!file.isDirectory()) {
+				params.put("jobId", jobId);
 				params.put("fileName", file.getName());
 				sessionTemplate.insert("com.spring.boot.batch.Customer.insert", params);
 			}
 		}
-		
+
 		return RepeatStatus.FINISHED;
 	}
 

@@ -34,9 +34,11 @@ import com.spring.boot.batch.domain.CustomerExtendModel;
 import com.spring.boot.batch.event.ItemReaderEventListener;
 import com.spring.boot.batch.event.ItemWriterEventListener;
 import com.spring.boot.batch.event.StepExecutionEventListener;
+import com.spring.boot.batch.event.UploadListener;
 import com.spring.boot.batch.flatfile.header.MybatisFlatFileHeaderCallback;
 import com.spring.boot.batch.jobparameters.CustomJobParameters;
 import com.spring.boot.batch.tasklet.CustomMulifileUploadTasklet;
+import com.spring.boot.batch.tasklet.FailTasklet;
 import com.spring.boot.batch.writer.CustomCompositeItemWriter;
 import com.spring.boot.batch.writer.MultiFlatFileCustomWriter;
 
@@ -128,7 +130,6 @@ public class CustomMultiFileJobConfiguration {
 	}
 	
 	@Bean
-	@JobScope
 	public Step classifierMultiFileStep() throws IOException, Exception {
 		LocalDateTime localDateTime = LocalDateTime.now();
 		executionTime = localDateTime.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
@@ -145,10 +146,10 @@ public class CustomMultiFileJobConfiguration {
 	}
 	
 	@Bean
-	@JobScope
 	public Step customMulifileUploadStep() {
 		return stepBuilderFactory.get("customMulifileUploadStep")
 				.tasklet(customUploadTasklet())
+				.listener(new UploadListener(sessionFactory))
 				.build();
 	}
 	
@@ -158,17 +159,36 @@ public class CustomMultiFileJobConfiguration {
 	}
 	
 	@Bean
+	public Step failStep() {
+		return stepBuilderFactory.get("failStep")
+				.tasklet(failTasklet())
+				.build();
+	}
+	
+	@Bean
+	public Tasklet failTasklet() {
+		return new FailTasklet();
+	}
+	
+	@Bean
 	@JobScope
 	public CustomJobParameters customJobParameters() {
 		return new CustomJobParameters();
 	}
 	
 	@Bean
-	public Job classifierMultiFileJob() throws IOException, Exception {
+	public Job classifierMultiFileJob(Step classifierMultiFileStep, Step customMulifileUploadStep, Step failStep) throws IOException, Exception {
 		return jobBuilderFactory.get("classifierMultiFileJob")
 				.incrementer(new RunIdIncrementer())
-				.start(classifierMultiFileStep())
-				.next(customMulifileUploadStep())
+				.start(classifierMultiFileStep)
+					.on("COMPLETED")
+					.to(customMulifileUploadStep)
+					.on("*")
+					.end()
+				.from(classifierMultiFileStep)
+					.on("FAILED")
+					.to(failStep)
+					.end()
 				.build();
 	}
 }
