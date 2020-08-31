@@ -124,7 +124,6 @@ public class CustomMultiFileJobConfiguration {
 			}
 		});
 		itemWriter.setResource(resource);
-		itemWriter.open(new ExecutionContext());
 		
 		return itemWriter;
 	}

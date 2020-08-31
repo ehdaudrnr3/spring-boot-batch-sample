@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.classify.Classifier;
 import org.springframework.classify.ClassifierSupport;
@@ -38,10 +39,12 @@ public class CustomCompositeItemWriter implements ItemWriter<CustomerExtendModel
 		}
 
 		for (String yearMonth : map.keySet()) {
-			ItemWriter<CustomerExtendModel> itemWriter = map.get(yearMonth).getWriter();
+			MultiFlatFileCustomWriter<CustomerExtendModel> itemWriter = map.get(yearMonth).getWriter();
 			List<CustomerExtendModel> list = map.get(yearMonth).getItems();
 			
+			itemWriter.open(new ExecutionContext());
 			itemWriter.write(list);
+			itemWriter.close();
 		}
 	}
 
