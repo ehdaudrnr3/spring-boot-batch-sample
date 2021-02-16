@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "mybatis-3-mapper.dtd">
 <mapper namespace="com.spring.boot.batch.Customer">
-	<select id="list" resultType="com.spring.boot.batch.domain.Customer">
+	<select id="list" resultType="com.spring.boot.batch.model.Customer">
 		SELECT * 
 		FROM CUSTOMER 
 		
 		LIMIT #{_skiprows}, #{_pagesize}
 	</select>
 	
-	<select id="list2" resultType="com.spring.boot.batch.domain.Customer">
+	<select id="list2" resultType="com.spring.boot.batch.model.Customer">
 		SELECT * 
 		FROM CUSTOMER 
 		WHERE 1 = 1

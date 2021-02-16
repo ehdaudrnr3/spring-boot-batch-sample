@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.batch.core.ItemWriteListener;
 
-import com.spring.boot.batch.domain.Customer;
+import com.spring.boot.batch.model.Customer;
 
 import lombok.extern.slf4j.Slf4j;
 
